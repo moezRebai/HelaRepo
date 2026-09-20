@@ -1,0 +1,29 @@
+{
+  "skill_name": "pr-review",
+  "evals": [
+    {
+      "id": 1,
+      "name": "bash-deploy-script",
+      "prompt": "Can you review this change before I merge it? It's a new deploy script we wrote as part of moving off Bitbucket onto GitLab. The change is in the folder FIXTURE_DIR — deploy.sh is the new file and change.diff is the unified diff. Give me a review report.",
+      "expected_output": "A severity-grouped review report that flags: no `set -euo pipefail`; unquoted `$dir`/`$f` expansions; `rm -rf \"$dir/\"` with no guard against empty/unset dir; `for f in $(ls build/)` word-splitting; unchecked `cd $dir`. Should NOT post comments without asking. Should not drown the report in false positives.",
+      "files": ["fixtures/eval-1-bash/deploy.sh", "fixtures/eval-1-bash/change.diff"],
+      "assertions": []
+    },
+    {
+      "id": 2,
+      "name": "python-injection",
+      "prompt": "Here's a small change to our task_runner.py — please review it. Files are in FIXTURE_DIR (task_runner.py plus change.diff). Let me know if it's good to merge.",
+      "expected_output": "A review that flags: `shell=True` with string-built `cmd` (command injection); mutable default argument `args=[]`; bare `except: pass` swallowing errors; no return-code/`check=True`; missing test for the new function. Draft-only, no posting without confirmation.",
+      "files": ["fixtures/eval-2-python/task_runner.py", "fixtures/eval-2-python/change.diff"],
+      "assertions": []
+    },
+    {
+      "id": 3,
+      "name": "gitlab-ci-migration",
+      "prompt": "We just ported our Bitbucket pipeline to GitLab CI. Can you review the .gitlab-ci.yml change? The diff (change.diff) and the new file are in FIXTURE_DIR. It replaces the old bitbucket-pipelines.yml.",
+      "expected_output": "A review that flags: hardcoded `DEPLOY_TOKEN` secret in `variables:`; token passed on the command line (leaks in logs); `image: python:latest` unpinned (was python:3.11); and the migration regression that deploy now runs on every pipeline (`rules: when: always`) whereas the Bitbucket version only deployed on `main`. Draft-only, no posting without confirmation.",
+      "files": ["fixtures/eval-3-gitlab-ci/.gitlab-ci.yml", "fixtures/eval-3-gitlab-ci/change.diff"],
+      "assertions": []
+    }
+  ]
+}
