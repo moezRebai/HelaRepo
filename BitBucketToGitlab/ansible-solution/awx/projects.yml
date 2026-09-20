@@ -1,0 +1,9 @@
+---
+# Project AWX = repo GitLab source des playbooks/roles (Project SCM = GitLab, cf. spec §5).
+awx_projects:
+  - name: ansible-solution
+    organization: Default
+    scm_type: git
+    scm_url: "{{ gitlab_repo_url }}"
+    scm_branch: main
+    scm_update_on_launch: true

@@ -1,0 +1,13 @@
+---
+# Inventory AWX correspondant à inventories/dev/hosts.yml (groupe webservers, host web1 — Task 1/4).
+awx_inventories:
+  - name: dev
+    organization: Default
+    hosts:
+      - name: web1
+        variables:
+          # Dev/Molecule container detail only (not a real/prod host). A real target
+          # host would omit ansible_connection/ansible_host here and instead use the
+          # `dev-machine` SSH credential in AWX for connectivity.
+          ansible_connection: docker
+          ansible_host: web1

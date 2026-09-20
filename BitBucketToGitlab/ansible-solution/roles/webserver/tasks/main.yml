@@ -1,0 +1,31 @@
+---
+- name: Installer le paquet web
+  ansible.builtin.apt:
+    name: "{{ web_package }}"
+    state: present
+    update_cache: true
+
+- name: Créer l'utilisateur système applicatif
+  ansible.builtin.user:
+    name: "{{ app_user }}"
+    system: true
+    create_home: false
+
+- name: S'assurer que le répertoire de config existe
+  ansible.builtin.file:
+    path: /etc/myapp
+    state: directory
+    mode: "0755"
+
+- name: Déployer la config applicative
+  ansible.builtin.template:
+    src: app.conf.j2
+    dest: /etc/myapp/app.conf
+    mode: "0644"
+  notify: restart web
+
+- name: Activer et démarrer le service web
+  ansible.builtin.service:
+    name: "{{ web_package }}"
+    enabled: true
+    state: started

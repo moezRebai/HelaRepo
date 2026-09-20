@@ -1,0 +1,6 @@
+---
+# Schedule = remplacement du trigger cron Jenkins pour une vérification nocturne de drift.
+awx_schedules:
+  - name: nightly-drift-check
+    unified_job_template: webserver-provision
+    rrule: "DTSTART:20260101T020000Z RRULE:FREQ=DAILY;INTERVAL=1"

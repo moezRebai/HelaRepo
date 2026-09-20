@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash __TRACKED_VAR__/scripts/review-package docs/superpowers/plans/2026-09-18-migration-tranche1-infra.md a69f64e4061f5c274da33e08f278cd9456e5f26f HEAD)"
+    ]
+  }
+}

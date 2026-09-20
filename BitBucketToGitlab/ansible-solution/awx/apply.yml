@@ -1,0 +1,68 @@
+---
+# Applique la configuration AWX (config-as-code) décrite dans ce répertoire.
+# Ordre : Project -> Inventory -> Hosts -> Credential -> Job Template -> Schedule
+# (un Job Template référence un inventory et un credential : ils doivent exister avant).
+#
+# Prérequis : voir README.md (instance AWX + variables d'environnement/vault
+# CONTROLLER_HOST/CONTROLLER_USERNAME/CONTROLLER_PASSWORD, gitlab_repo_url,
+# awx_ssh_user, awx_ssh_key).
+- name: Appliquer la config AWX
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - projects.yml
+    - inventories.yml
+    - credentials.yml
+    - job_templates.yml
+    - schedules.yml
+  tasks:
+    - name: Projects
+      awx.awx.project:
+        name: "{{ item.name }}"
+        organization: "{{ item.organization }}"
+        scm_type: "{{ item.scm_type }}"
+        scm_url: "{{ item.scm_url }}"
+        scm_branch: "{{ item.scm_branch }}"
+        scm_update_on_launch: "{{ item.scm_update_on_launch }}"
+      loop: "{{ awx_projects }}"
+
+    - name: Inventories
+      awx.awx.inventory:
+        name: "{{ item.name }}"
+        organization: "{{ item.organization }}"
+      loop: "{{ awx_inventories }}"
+
+    - name: Hosts
+      awx.awx.host:
+        name: "{{ item.1.name }}"
+        inventory: "{{ item.0.name }}"
+        variables: "{{ item.1.variables | default(omit) }}"
+      loop: "{{ awx_inventories | subelements('hosts') }}"
+
+    - name: Credentials
+      awx.awx.credential:
+        name: "{{ item.name }}"
+        organization: "{{ item.organization }}"
+        credential_type: "{{ item.credential_type }}"
+        inputs: "{{ item.inputs }}"
+      loop: "{{ awx_credentials }}"
+      no_log: true
+
+    - name: Job templates
+      awx.awx.job_template:
+        name: "{{ item.name }}"
+        project: "{{ item.project }}"
+        playbook: "{{ item.playbook }}"
+        inventory: "{{ item.inventory }}"
+        credentials: "{{ item.credentials }}"
+        survey_enabled: "{{ item.survey_enabled }}"
+        survey_spec: "{{ item.survey_spec }}"
+      loop: "{{ awx_job_templates }}"
+
+    - name: Schedules
+      awx.awx.schedule:
+        name: "{{ item.name }}"
+        unified_job_template: "{{ item.unified_job_template }}"
+        rrule: "{{ item.rrule }}"
+      loop: "{{ awx_schedules }}"

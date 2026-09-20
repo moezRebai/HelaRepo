@@ -1,0 +1,27 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  tasks:
+    - name: Récupérer l'état du paquet nginx
+      ansible.builtin.command: dpkg -s nginx
+      register: pkg
+      changed_when: false
+
+    - name: Récupérer l'utilisateur appsvc
+      ansible.builtin.getent:
+        database: passwd
+        key: appsvc
+
+    - name: Lire la config déployée
+      ansible.builtin.slurp:
+        src: /etc/myapp/app.conf
+      register: conf
+
+    - name: Vérifier l'état final
+      ansible.builtin.assert:
+        that:
+          - "'install ok installed' in pkg.stdout"
+          - "'listen_port=8080' in (conf.content | b64decode)"
+          - "'run_as=appsvc' in (conf.content | b64decode)"
+        fail_msg: "État final incorrect après converge"
